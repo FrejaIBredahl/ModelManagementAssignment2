@@ -1,7 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using ModelManagementAssignment2.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddDbContext<ModelManagementDb>(opt => opt.UseInMemoryDatabase("ModelManagement"));
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
