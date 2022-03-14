@@ -1,16 +1,14 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
 using ModelManagementAssignment2.Models;
+using ModelManagementAssignment2.ViewModels;
 
 namespace ModelManagementAssignment2.Controllers
 {
+    //This class uses Mapster to map between ViewModels and Db Models: https://www.codeproject.com/Articles/1249355/Mapster-Your-Next-Level-Object-to-Object-Mapping-T
     [Route("api/[controller]")]
     [ApiController]
     public class ModelsController : ControllerBase
@@ -23,13 +21,23 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // GET: api/Models
+        //Krav: Hente en liste med alle modeller – uden data for deres jobs eller udgifter.
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Model>>> GetModels()
+        public async Task<ActionResult<IEnumerable<ModelViewModel>>> GetModels()
         {
-            return await _context.Models.ToListAsync();
+            var rawresult = await _context.Models.ToListAsync();
+            var result = new List<ModelViewModel>();
+
+            foreach (var model in rawresult)
+            {
+                result.Add(model.Adapt<ModelViewModel>());
+            }
+                
+            return Ok(result);
         }
 
         // GET: api/Models/5
+        //Krav: Hente model med den angivne ModelId inklusiv modellens jobs og udgifter.
         [HttpGet("{id}")]
         public async Task<ActionResult<Model>> GetModel(long id)
         {
@@ -44,16 +52,16 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // PUT: api/Models/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //Krav: Opdatere en model – kun grunddata – ikke jobs og udgifter.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutModel(long id, Model model)
-        {
+        public async Task<IActionResult> PutModel(long id, ModelViewModel model)
+        {            
             if (id != model.ModelId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(model).State = EntityState.Modified;
+            _context.Entry(model.Adapt<Model>()).State = EntityState.Modified;
 
             try
             {
@@ -75,17 +83,19 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // POST: api/Models
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //Krav: Opret ny model – kun grunddata – ikke jobs og udgifter.
         [HttpPost]
-        public async Task<ActionResult<Model>> PostModel(Model model)
+        public async Task<ActionResult<ModelViewModel>> PostModel(ModelViewModel model)
         {
-            _context.Models.Add(model);
+            var newModel = model.Adapt<Model>();
+            _context.Models.Add(newModel);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetModel", new { id = model.ModelId }, model);
         }
 
         // DELETE: api/Models/5
+        //Krav: Slette en model
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteModel(long id)
         {

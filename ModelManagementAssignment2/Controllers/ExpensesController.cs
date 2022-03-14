@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
+using ModelManagementAssignment2.Hubs;
 using ModelManagementAssignment2.Models;
 
 namespace ModelManagementAssignment2.Controllers
@@ -16,10 +18,12 @@ namespace ModelManagementAssignment2.Controllers
     public class ExpensesController : ControllerBase
     {
         private readonly ModelManagementDb _context;
+        private readonly IHubContext<ExpenseHub,INotificationHub> _hubContext;
 
-        public ExpensesController(ModelManagementDb context)
+        public ExpensesController(ModelManagementDb context, IHubContext<ExpenseHub, INotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: api/Expenses
@@ -44,7 +48,6 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // PUT: api/Expenses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExpense(long id, Expense expense)
         {
@@ -75,12 +78,22 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // POST: api/Expenses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Expense>> PostExpense(Expense expense)
+        public async Task<ActionResult<Expense>> PostExpense(Expense expense, int modelid, int jobid)
         {
-            _context.Expenses.Add(expense);
-            await _context.SaveChangesAsync();
+            var model = await _context.Models.FindAsync(modelid);
+            var job = await _context.Jobs.FindAsync(jobid);
+
+            if (job != null && job.Models != null && job.Models.Contains(model)) 
+            { 
+                _context.Expenses.Add(expense);
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.NewObjectCreated($"New Expense has been created: {newExpense.Text}");
+            }
+            else
+            {
+                BadRequest();
+            }
 
             return CreatedAtAction("GetExpense", new { id = expense.ExpenseId }, expense);
         }
