@@ -31,12 +31,12 @@ namespace ModelManagementAssignment2.Controllers
             return await _context.Jobs.ToListAsync();
         }
 
-        // GET: api/Jobs/
+        // GET: api/GetJobsForModel/
         //Krav: Hente en liste med alle jobs for en angiven model – uden expenses.
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJobsForModel(int modelid)
+        [HttpGet("JobsForModel/{modelid}")]
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobsForModel(long modelid)
         {
-            var model = await _context.Models.FindAsync(modelid);
+            var model = await _context.Models.Where(x => x.ModelId == modelid).Include(j => j.Jobs).SingleOrDefaultAsync();
 
             var result = model.Jobs.ToList();
 
@@ -45,20 +45,20 @@ namespace ModelManagementAssignment2.Controllers
 
         // GET: api/Jobs/
         //Krav: Hente en liste med alle jobs. Skal inkludere navn på modeller, som er sat på de enkelte jobs, men ikke expenses.
-        [HttpGet]
+        [HttpGet("JobsAndModels")]
         public async Task<ActionResult<IEnumerable<GetJobViewModel>>> GetJobsAndModels()
         {
-            var rawresult = await _context.Jobs.ToListAsync();
+            var rawresult = await _context.Jobs.Include(m => m.Models).ToListAsync();
 
             return Ok(rawresult.Adapt<GetJobViewModel>());
         }
 
         // GET: api/Jobs/5
         //Krav: Hente job med den angivne JobId. Skal inkludere listen med alle expenses for jobbet.
-        [HttpGet("{id}")]
+        [HttpGet("{jobid}")]
         public async Task<ActionResult<Job>> GetJob(long jobid)
         {
-            var job = await _context.Jobs.FindAsync(jobid);
+            var job = await _context.Jobs.Where(x => x.JobId == jobid).SingleOrDefaultAsync();
 
             if (job == null)
             {
@@ -69,10 +69,10 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // PUT: api/Jobs/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutJob(long id, UpdateJobViewModel job)
+        [HttpPut("{jobid}")]
+        public async Task<IActionResult> PutJob(long jobid, UpdateJobViewModel job)
         {
-            if (id != job.JobId)
+            if (jobid != job.JobId)
             {
                 return BadRequest();
             }
@@ -85,7 +85,7 @@ namespace ModelManagementAssignment2.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!JobExists(id))
+                if (!JobExists(jobid))
                 {
                     return NotFound();
                 }
@@ -100,11 +100,11 @@ namespace ModelManagementAssignment2.Controllers
 
         // PUT: api/Jobs/5
         //Krav: Tilføj model til job. Bemærk at der godt kan være flere modeller på samme job.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutModelToJob(long jobid, int modelid)
+        [HttpPatch("ModelToJob/{jobid}/{modelid}")]
+        public async Task<IActionResult> PatchModelToJob(long jobid, long modelid)
         {
-            var model = await _context.Models.FindAsync(modelid);
-            var job = await _context.Jobs.FindAsync(jobid);
+            var model = await _context.Models.Where(x => x.ModelId == modelid).Include(m => m.Jobs).SingleOrDefaultAsync();
+            var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(j => j.Models).SingleOrDefaultAsync();
 
             if (job.Models == null)
             {
@@ -113,7 +113,9 @@ namespace ModelManagementAssignment2.Controllers
             if (!job.Models.Contains(model))
             {
                 job.Models.Add(model);
+                model.Jobs.Add(job);
                 _context.Entry(job).State = EntityState.Modified;
+                _context.Entry(model).State = EntityState.Modified;
             }
             else
             {
@@ -141,16 +143,18 @@ namespace ModelManagementAssignment2.Controllers
 
         // PUT: api/Jobs/5
         //Krav: Slet model fra job
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutRemoveModelFromJob(long jobid, int modelid)
+        [HttpPut("RemoveModelFromJob/{jobid}/{modelid}")]
+        public async Task<IActionResult> PutRemoveModelFromJob(long jobid, long modelid)
         {
-            var model = await _context.Models.FindAsync(modelid);
-            var job = await _context.Jobs.FindAsync(jobid);
+            var model = await _context.Models.Where(x => x.ModelId == modelid).Include(m => m.Jobs).SingleOrDefaultAsync();
+            var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(j => j.Models).SingleOrDefaultAsync();
 
             if (job.Models != null && job.Models.Contains(model))
             {
                 job.Models.Remove(model);
+                model.Jobs.Remove(job);
                 _context.Entry(job).State = EntityState.Modified;
+                _context.Entry(model).State = EntityState.Modified;
             }
             else
             {
@@ -178,14 +182,14 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // POST: api/Jobs
-        //Krav: Opret nyt job
+        //Krav: Opret nyt jobpost
         [HttpPost]
-        public async Task<ActionResult<Job>> PostJob(Job job)
+        public async Task<ActionResult<Job>> PostJob(CreateJobViewModel job)
         {
-            _context.Jobs.Add(job);
+            _context.Jobs.Add(job.Adapt<Job>());
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetJob", new { id = job.JobId }, job);
+            return CreatedAtAction("GetJob", new { jobid = job.JobId }, job);
         }
 
         // DELETE: api/Jobs/5

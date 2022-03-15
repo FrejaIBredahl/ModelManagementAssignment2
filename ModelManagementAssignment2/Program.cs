@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
+using ModelManagementAssignment2.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<ModelManagementDb>(opt => opt.UseInMemoryDatabase("ModelManagement"));
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
+builder.Services.AddDbContext<ModelManagementDb>(opt => opt.UseInMemoryDatabase("ModelManagement"));
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -21,10 +22,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAuthorization();
-
 app.MapControllers();
-app.MapHub<>
+app.MapHub<ExpenseHub>("/expenseNotification");
+app.UseRouting();
 
 app.Run();

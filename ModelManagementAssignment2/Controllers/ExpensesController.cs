@@ -1,9 +1,4 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +13,9 @@ namespace ModelManagementAssignment2.Controllers
     public class ExpensesController : ControllerBase
     {
         private readonly ModelManagementDb _context;
-        private readonly IHubContext<ExpenseHub,INotificationHub> _hubContext;
+        private readonly IHubContext<ExpenseHub,IExpensesHub> _hubContext;
 
-        public ExpensesController(ModelManagementDb context, IHubContext<ExpenseHub, INotificationHub> hubContext)
+        public ExpensesController(ModelManagementDb context, IHubContext<ExpenseHub, IExpensesHub> hubContext)
         {
             _context = context;
             _hubContext = hubContext;
@@ -37,7 +32,7 @@ namespace ModelManagementAssignment2.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpense(long id)
         {
-            var expense = await _context.Expenses.FindAsync(id);
+            var expense = await _context.Expenses.Where(x => x.ExpenseId == id).SingleOrDefaultAsync();
 
             if (expense == null)
             {
@@ -78,17 +73,25 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // POST: api/Expenses
-        [HttpPost]
-        public async Task<ActionResult<Expense>> PostExpense(Expense expense, int modelid, int jobid)
+        //Krav: Oprette en ny expense. Bemærk at en expense både er tilknyttet en model og et job.
+        [HttpPost("{modelid}/{jobid}")]
+        public async Task<ActionResult<Expense>> PostExpense(Expense expense, long modelid, long jobid)
         {
-            var model = await _context.Models.FindAsync(modelid);
-            var job = await _context.Jobs.FindAsync(jobid);
+            var model = await _context.Models.Where(m => m.ModelId == modelid).Include(e => e.Expenses).SingleOrDefaultAsync();
+            var job = await _context.Jobs.Where(j => j.JobId == jobid).Include(e => e.Expenses).Include(m => m.Models).SingleOrDefaultAsync();
 
-            if (job != null && job.Models != null && job.Models.Contains(model)) 
+            if (job.Models.Contains(model))
             { 
                 _context.Expenses.Add(expense);
+
+                _context.Entry(expense).State = EntityState.Modified;
+                _context.Entry(model).State = EntityState.Modified;
+                _context.Entry(job).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
-                await _hubContext.Clients.All.NewObjectCreated($"New Expense has been created: {newExpense.Text}");
+
+
+                await _hubContext.Clients.All.NewExpenseCreated(expense.Text);
             }
             else
             {

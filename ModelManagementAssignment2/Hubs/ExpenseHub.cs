@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace ModelManagementAssignment2.Hubs
 {
-    public class ExpenseHub : Hub<INotificationHub>
+    public class ExpenseHub : Hub<IExpensesHub>
     {
         public async Task NewExpenseCreated(Expense newExpense)
         {
-            await Clients.All.NewObjectCreated($"New Expense has been created: {newExpense.Text}");
+            await Clients.All.NewExpenseCreated(newExpense.Text);
         }
     }
 }
