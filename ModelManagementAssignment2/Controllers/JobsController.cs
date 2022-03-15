@@ -1,10 +1,5 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Mapster;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
@@ -106,10 +101,6 @@ namespace ModelManagementAssignment2.Controllers
             var model = await _context.Models.Where(x => x.ModelId == modelid).Include(m => m.Jobs).SingleOrDefaultAsync();
             var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(j => j.Models).SingleOrDefaultAsync();
 
-            if (job.Models == null)
-            {
-                job.Models = new List<Model>();
-            }
             if (!job.Models.Contains(model))
             {
                 job.Models.Add(model);
@@ -149,7 +140,7 @@ namespace ModelManagementAssignment2.Controllers
             var model = await _context.Models.Where(x => x.ModelId == modelid).Include(m => m.Jobs).SingleOrDefaultAsync();
             var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(j => j.Models).SingleOrDefaultAsync();
 
-            if (job.Models != null && job.Models.Contains(model))
+            if (job.Models.Contains(model))
             {
                 job.Models.Remove(model);
                 model.Jobs.Remove(job);
