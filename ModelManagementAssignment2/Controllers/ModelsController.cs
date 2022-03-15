@@ -41,7 +41,7 @@ namespace ModelManagementAssignment2.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Model>> GetModel(long id)
         {
-            var model = await _context.Models.FindAsync(id);
+            var model = await _context.Models.Where(m => m.ModelId == id).Include(j => j.Jobs).Include(e => e.Expenses).SingleOrDefaultAsync();
 
             if (model == null)
             {
