@@ -45,7 +45,20 @@ namespace ModelManagementAssignment2.Controllers
         {
             var rawresult = await _context.Jobs.Include(m => m.Models).ToListAsync();
 
-            return Ok(rawresult.Adapt<GetJobViewModel>());
+            var result = new List<GetJobViewModel>();
+            
+            var counter = 0;
+
+            foreach (var job in rawresult)
+            {
+                result.Add(job.Adapt<GetJobViewModel>());
+                result[counter].ModelNames = new List<string>();
+                job.Models.ForEach(m => result[counter].ModelNames.Add($"{m.FirstName } {m.LastName}"));
+
+                counter++;  
+            }
+
+            return Ok(result);
         }
 
         // GET: api/Jobs/5

@@ -10,6 +10,6 @@ namespace ModelManagementAssignment2.ViewModels
         public int Days { get; set; }
         public string? Location { get; set; }
         public string? Comments { get; set; }
-        public List<Model>? Models { get; set; }
+        public List<string>? ModelNames { get; set; }
     }
 }
