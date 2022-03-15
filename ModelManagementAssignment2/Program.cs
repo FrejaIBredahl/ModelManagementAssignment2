@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
 using ModelManagementAssignment2.Hubs;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSignalR();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 builder.Services.AddDbContext<ModelManagementDb>(opt => opt.UseInMemoryDatabase("ModelManagement"));
 //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddEndpointsApiExplorer();

@@ -84,7 +84,6 @@ namespace ModelManagementAssignment2.Controllers
             { 
                 _context.Expenses.Add(expense);
 
-                _context.Entry(expense).State = EntityState.Modified;
                 _context.Entry(model).State = EntityState.Modified;
                 _context.Entry(job).State = EntityState.Modified;
 

@@ -28,7 +28,7 @@ namespace ModelManagementAssignment2.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
-            return await _context.Jobs.ToListAsync();
+            return await _context.Jobs.Include(m => m.Models).Include(e => e.Expenses).ToListAsync();
         }
 
         // GET: api/GetJobsForModel/
@@ -40,7 +40,7 @@ namespace ModelManagementAssignment2.Controllers
 
             var result = model.Jobs.ToList();
 
-            return Ok(result.Adapt<GetJobViewModel>());
+            return Ok(result);
         }
 
         // GET: api/Jobs/
@@ -58,7 +58,7 @@ namespace ModelManagementAssignment2.Controllers
         [HttpGet("{jobid}")]
         public async Task<ActionResult<Job>> GetJob(long jobid)
         {
-            var job = await _context.Jobs.Where(x => x.JobId == jobid).SingleOrDefaultAsync();
+            var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(e => e.Expenses).SingleOrDefaultAsync();
 
             if (job == null)
             {
