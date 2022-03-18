@@ -77,16 +77,40 @@ namespace ModelManagementAssignment2.Controllers
         }
 
         // PATCH: api/Jobs/5
-        //Krav: Hente job med den angivne JobId. Skal inkludere listen med alle expenses for jobbet
-        [HttpPut("{jobid}")]
-        public async Task<IActionResult> PutJob(long jobid, UpdateJobViewModel job)
+        //Krav: Opdatere et job – kun StartDate, Days, Location og Comments kan ændres.
+        [HttpPatch("{jobid}")]
+        public async Task<IActionResult> PatchJob(long jobid, UpdateJobViewModel job)
         {
             if (jobid != job.JobId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(job.Adapt<Job>()).State = EntityState.Modified;
+            var dbjob = await _context.Jobs.Where(x => x.JobId == jobid).SingleOrDefaultAsync();
+
+            if (dbjob == null)
+            {
+                return NotFound();
+            }
+
+            if (job.StartDate.Date != DateTime.Now.Date && job.StartDate.Year != DateTime.Now.Year)
+            {
+                dbjob.StartDate = job.StartDate;
+            }
+            if (job.Days != 0)
+            {
+                dbjob.Days = job.Days;
+            }
+            if (job.Location != null && job.Location != "string")
+            {
+                dbjob.Location= job.Location;
+            }
+            if (job.Comments != null && job.Comments != "string")
+            {
+                dbjob.Comments = job.Comments;
+            }
+
+            _context.Entry(dbjob).State = EntityState.Modified;
 
             try
             {
