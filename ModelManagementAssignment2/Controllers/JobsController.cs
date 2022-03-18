@@ -76,7 +76,8 @@ namespace ModelManagementAssignment2.Controllers
             return job;
         }
 
-        // PUT: api/Jobs/5
+        // PATCH: api/Jobs/5
+        //Krav: Hente job med den angivne JobId. Skal inkludere listen med alle expenses for jobbet
         [HttpPut("{jobid}")]
         public async Task<IActionResult> PutJob(long jobid, UpdateJobViewModel job)
         {
@@ -106,7 +107,7 @@ namespace ModelManagementAssignment2.Controllers
             return NoContent();
         }
 
-        // PUT: api/Jobs/5
+        // PATCH: api/Jobs/5
         //Krav: Tilføj model til job. Bemærk at der godt kan være flere modeller på samme job.
         [HttpPatch("ModelToJob/{jobid}/{modelid}")]
         public async Task<IActionResult> PatchModelToJob(long jobid, long modelid)

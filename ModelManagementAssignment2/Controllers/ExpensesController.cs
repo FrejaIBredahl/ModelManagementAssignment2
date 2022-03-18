@@ -74,7 +74,7 @@ namespace ModelManagementAssignment2.Controllers
 
         // POST: api/Expenses
         //Krav: Oprette en ny expense. Bemærk at en expense både er tilknyttet en model og et job.
-        [HttpPost("{modelid}/{jobid}")]
+        [HttpPost("Expense")]
         public async Task<ActionResult<Expense>> PostExpense(Expense expense, long modelid, long jobid)
         {
             var model = await _context.Models.Where(m => m.ModelId == modelid).Include(e => e.Expenses).SingleOrDefaultAsync();

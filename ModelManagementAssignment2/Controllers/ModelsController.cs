@@ -51,10 +51,10 @@ namespace ModelManagementAssignment2.Controllers
             return model;
         }
 
-        // PUT: api/Models/5
+        // PATCH: api/Models/5
         //Krav: Opdatere en model – kun grunddata – ikke jobs og udgifter.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutModel(long id, ModelViewModel model)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchModel(long id, ModelViewModel model)
         {            
             if (id != model.ModelId)
             {
