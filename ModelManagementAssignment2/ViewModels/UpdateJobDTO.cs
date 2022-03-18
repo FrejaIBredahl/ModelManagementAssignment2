@@ -1,6 +1,6 @@
 ﻿namespace ModelManagementAssignment2.ViewModels
 {
-    public class CreateJobViewModel
+    public class UpdateJobDTO
     {
         public long JobId { get; set; }
         public string? Customer { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace ModelManagementAssignment2.ViewModels
 {
-    public class ModelViewModel
+    public class GetJobsForModelDTO
     {
         public long ModelId { get; set; }
         public string? FirstName { get; set; }
@@ -16,5 +16,7 @@
         public int ShoeSize { get; set; }
         public string? HairColor { get; set; }
         public string? Comments { get; set; }
+
+        public List<UpdateJobDTO>? Jobs { get; set; }
     }
 }

@@ -29,29 +29,35 @@ namespace ModelManagementAssignment2.Controllers
         // GET: api/GetJobsForModel/
         //Krav: Hente en liste med alle jobs for en angiven model – uden expenses.
         [HttpGet("JobsForModel/{modelid}")]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJobsForModel(long modelid)
+        public async Task<ActionResult<IEnumerable<GetJobsForModelDTO>>> GetJobsForModel(long modelid)
         {
-            var model = await _context.Models.Where(x => x.ModelId == modelid).Include(j => j.Jobs).SingleOrDefaultAsync();
+            var rawmodel = await _context.Models.Where(x => x.ModelId == modelid).Include(j => j.Jobs).ToListAsync();
 
-            var result = model.Jobs.ToList();
+            var result = new List<GetJobsForModelDTO>();
+
+
+            foreach (var model in rawmodel)
+            {
+                result.Add(model.Adapt<GetJobsForModelDTO>());
+            }
 
             return Ok(result);
         }
 
         // GET: api/Jobs/
         //Krav: Hente en liste med alle jobs. Skal inkludere navn på modeller, som er sat på de enkelte jobs, men ikke expenses.
-        [HttpGet("JobsAndModels")]
-        public async Task<ActionResult<IEnumerable<GetJobViewModel>>> GetJobsAndModels()
+        [HttpGet("JobsWithModels")]
+        public async Task<ActionResult<IEnumerable<GetJobDTO>>> GetJobsAndModels()
         {
             var rawresult = await _context.Jobs.Include(m => m.Models).ToListAsync();
 
-            var result = new List<GetJobViewModel>();
+            var result = new List<GetJobDTO>();
             
             var counter = 0;
 
             foreach (var job in rawresult)
             {
-                result.Add(job.Adapt<GetJobViewModel>());
+                result.Add(job.Adapt<GetJobDTO>());
                 result[counter].ModelNames = new List<string>();
                 job.Models.ForEach(m => result[counter].ModelNames.Add($"{m.FirstName } {m.LastName}"));
 
@@ -63,23 +69,30 @@ namespace ModelManagementAssignment2.Controllers
 
         // GET: api/Jobs/5
         //Krav: Hente job med den angivne JobId. Skal inkludere listen med alle expenses for jobbet.
-        [HttpGet("{jobid}")]
-        public async Task<ActionResult<Job>> GetJob(long jobid)
+        [HttpGet("JobWithExpenses/{jobid}")]
+        public async Task<ActionResult<GetJobWithExpensesDTO>> GetJob(long jobid)
         {
-            var job = await _context.Jobs.Where(x => x.JobId == jobid).Include(e => e.Expenses).SingleOrDefaultAsync();
+            var rawjob = await _context.Jobs.Where(x => x.JobId == jobid).Include(e => e.Expenses).ToListAsync();
 
-            if (job == null)
+            if (rawjob == null)
             {
                 return NotFound();
             }
 
-            return job;
+            var result = new List<GetJobWithExpensesDTO>();
+
+            foreach (var job in rawjob)
+            {
+                result.Add(job.Adapt<GetJobWithExpensesDTO>());
+            }
+
+            return Ok(result);
         }
 
         // PATCH: api/Jobs/5
         //Krav: Opdatere et job – kun StartDate, Days, Location og Comments kan ændres.
         [HttpPatch("{jobid}")]
-        public async Task<IActionResult> PatchJob(long jobid, UpdateJobViewModel job)
+        public async Task<IActionResult> PatchJob(long jobid, UpdateJobDTO job)
         {
             if (jobid != job.JobId)
             {
@@ -213,7 +226,7 @@ namespace ModelManagementAssignment2.Controllers
         // POST: api/Jobs
         //Krav: Opret nyt jobpost
         [HttpPost]
-        public async Task<ActionResult<Job>> PostJob(CreateJobViewModel job)
+        public async Task<ActionResult<Job>> PostJob(UpdateJobDTO job)
         {
             _context.Jobs.Add(job.Adapt<Job>());
             await _context.SaveChangesAsync();

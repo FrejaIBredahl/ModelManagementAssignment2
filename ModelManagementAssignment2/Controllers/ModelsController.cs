@@ -24,14 +24,14 @@ namespace ModelManagementAssignment2.Controllers
         // GET: api/Models
         //Krav: Hente en liste med alle modeller – uden data for deres jobs eller udgifter.
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ModelViewModel>>> GetModels()
+        public async Task<ActionResult<IEnumerable<ModelDTO>>> GetModels()
         {
             var rawresult = await _context.Models.ToListAsync();
-            var result = new List<ModelViewModel>();
+            var result = new List<ModelDTO>();
 
             foreach (var model in rawresult)
             {
-                result.Add(model.Adapt<ModelViewModel>());
+                result.Add(model.Adapt<ModelDTO>());
             }
                 
             return Ok(result);
@@ -55,7 +55,7 @@ namespace ModelManagementAssignment2.Controllers
         // PATCH: api/Models/5
         //Krav: Opdatere en model – kun grunddata – ikke jobs og udgifter.
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PatchModel(long id, ModelViewModel model)
+        public async Task<IActionResult> PatchModel(long id, ModelDTO model)
         {   
             
             if (id != model.ModelId)
@@ -147,7 +147,7 @@ namespace ModelManagementAssignment2.Controllers
         // POST: api/Models
         //Krav: Opret ny model – kun grunddata – ikke jobs og udgifter.
         [HttpPost]
-        public async Task<ActionResult<ModelViewModel>> PostModel(ModelViewModel model)
+        public async Task<ActionResult<ModelDTO>> PostModel(ModelDTO model)
         {
             var newModel = model.Adapt<Model>();
             _context.Models.Add(newModel);

@@ -2,7 +2,7 @@
 
 namespace ModelManagementAssignment2.ViewModels
 {
-    public class GetJobViewModel
+    public class GetJobWithExpensesDTO
     {
         public long JobId { get; set; }
         public string? Customer { get; set; }
@@ -10,6 +10,6 @@ namespace ModelManagementAssignment2.ViewModels
         public int Days { get; set; }
         public string? Location { get; set; }
         public string? Comments { get; set; }
-        public List<string>? ModelNames { get; set; }
+        public List<Expense>? Expenses { get; set; }
     }
 }

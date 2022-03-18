@@ -1,6 +1,8 @@
-﻿namespace ModelManagementAssignment2.ViewModels
+﻿using ModelManagementAssignment2.Models;
+
+namespace ModelManagementAssignment2.ViewModels
 {
-    public class UpdateJobViewModel
+    public class GetJobDTO
     {
         public long JobId { get; set; }
         public string? Customer { get; set; }
@@ -8,5 +10,6 @@
         public int Days { get; set; }
         public string? Location { get; set; }
         public string? Comments { get; set; }
+        public List<string>? ModelNames { get; set; }
     }
 }
