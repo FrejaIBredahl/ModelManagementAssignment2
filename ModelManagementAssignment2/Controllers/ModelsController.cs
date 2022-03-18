@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ModelManagementAssignment2.Data;
 using ModelManagementAssignment2.Models;
-using ModelManagementAssignment2.ViewModels;
+using ModelManagementAssignment2.DTO;
 
 namespace ModelManagementAssignment2.Controllers
 {

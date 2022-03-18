@@ -1,6 +1,6 @@
 ﻿using ModelManagementAssignment2.Models;
 
-namespace ModelManagementAssignment2.ViewModels
+namespace ModelManagementAssignment2.DTO
 {
     public class GetJobWithExpensesDTO
     {
